@@ -56,15 +56,17 @@ model User {
   sessions              Session[]
   magicLinks            MagicLink[]
   profile               UserProfile?
-  organization          Organization?  @relation("OrganizationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
-  department            Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  createdOrganization   Organization?  @relation("OrganizationCreator")
-  approvedOrganizations Organization[] @relation("OrganizationApprover")
-  WorkSchedule          WorkSchedule[]
-  Contract              Contract[]
-  Documents             Documents[]
-  Employment            Employment[]
-  managedEmployees      Employment[]   @relation("EmployeeLineManager")
+  organization          Organization?      @relation("OrganizationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
+  department            Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdOrganization   Organization?      @relation("OrganizationCreator")
+  approvedOrganizations Organization[]     @relation("OrganizationApprover")
+  contracts             Contract[]
+  documents             Documents[]
+  employments           Employment[]       @relation("employments")
+  managedEmployees      Employment[]       @relation("EmployeeLineManager")
+  attendances           Attendance[]
+  assignedSchedules     UserWorkSchedule[] // Many-to-many
+  auditLogs             AuditLog[]
 
   @@index([organizationId])
   @@index([departmentId])
@@ -167,10 +169,13 @@ model Organization {
   updatedAt    DateTime           @updatedAt
   approvedAt   DateTime? // When super admin approved
 
-  createdBy  User     @relation("OrganizationCreator", fields: [createdById], references: [id])
-  approvedBy User?    @relation("OrganizationApprover", fields: [approvedById], references: [id])
-  branches   Branch[]
-  users      User[]   @relation("OrganizationMembers")
+  createdBy     User           @relation("OrganizationCreator", fields: [createdById], references: [id])
+  approvedBy    User?          @relation("OrganizationApprover", fields: [approvedById], references: [id])
+  branches      Branch[]
+  users         User[]         @relation("OrganizationMembers")
+  documents     Documents[]
+  workSchedules WorkSchedule[]
+  auditLogs     AuditLog[]
 
   @@index([approvedById])
   @@index([status])
@@ -207,8 +212,9 @@ model Department {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  users  User[]
+  branch      Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  users       User[]
+  employments Employment[]
 
   @@index([branchId])
   @@schema("public")
@@ -240,8 +246,7 @@ model Employment {
   id             String         @id @default(uuid())
   userId         String
   employeeId     String // Employee ID (e.g., "UNI203")
-  jobTitle       String // e.g., "UI UX Designer"
-  positionType   PositionType? // Full-time, Part-time, etc.
+  jobTitleId     String // e.g., "UI UX Designer"
   employmentType EmploymentType // Full-time, Part-time, Contract, Intern
   lineManagerId  String? // Reference to manager's User ID
   departmentId   String? // Can track department changes over time
@@ -251,30 +256,26 @@ model Employment {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lineManager User? @relation("EmployeeLineManager", fields: [lineManagerId], references: [id], onDelete: SetNull)
+  user        User        @relation("employments", fields: [userId], references: [id], onDelete: Cascade)
+  lineManager User?       @relation("EmployeeLineManager", fields: [lineManagerId], references: [id], onDelete: SetNull)
+  jobTitle    JobTitles   @relation(fields: [jobTitleId], references: [id], onDelete: SetNull)
+  department  Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([employeeId])
   @@index([lineManagerId])
+  @@index([departmentId])
   @@index([isActive])
   @@schema("public")
 }
 
-model WorkSchedule {
-  id        String   @id @default(uuid())
-  userId    String
-  dayOfWeek Int // 0-6 (Sunday-Saturday)
-  startTime String // HH:mm format (e.g., "09:00")
-  endTime   String // HH:mm format (e.g., "17:00")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model JobTitles {
+  id          String       @id @default(uuid())
+  title       String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  employments Employment[]
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, dayOfWeek])
-  @@index([userId])
   @@schema("public")
 }
 
@@ -308,20 +309,134 @@ enum DocumentType {
 }
 
 model Documents {
-  id           String       @id @default(uuid())
-  userId       String
-  documentType DocumentType
-  fileName     String // Original file name
-  fileUrl      String // S3/storage URL
-  fileSize     Int? // Size in bytes
-  mimeType     String? // e.g., "application/pdf"
-  uploadedAt   DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  documentType   DocumentType
+  fileName       String // Original file name
+  fileUrl        String // S3/storage URL
+  fileSize       Int? // Size in bytes
+  mimeType       String? // e.g., "application/pdf"
+  uploadedAt     DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([documentType])
+  @@schema("public")
+}
+
+model Attendance {
+  id               String           @id @default(uuid())
+  userId           String
+  date             DateTime         @db.Date
+  clockIn          DateTime?
+  clockInLocation  String?
+  clockInTimezone  String?
+  clockOut         DateTime?
+  clockOutLocation String?
+  clockOutTimezone String?
+  scheduledHours   Decimal          @db.Decimal(5, 2) // From WorkSchedule
+  loggedHours      Decimal          @db.Decimal(5, 2) // Calculated
+  paidHours        Decimal          @db.Decimal(5, 2) // After deductions
+  deficitHours     Decimal          @db.Decimal(5, 2) // Difference
+  overtimeHours    Decimal          @default(0) @db.Decimal(5, 2)
+  status           AttendanceStatus @default(PENDING)
+  notes            String?          @db.Text
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, date])
   @@index([userId])
-  @@index([documentType])
+  @@index([date])
+  @@schema("public")
+}
+
+model WorkSchedule {
+  id                  String           @id @default(uuid())
+  organizationId      String
+  name                String // e.g., "Mon-Fri, Duration 40 hours/week"
+  scheduleType        WorkScheduleType @default(DURATION_BASED)
+  isDefault           Boolean          @default(false) // Default schedule for new employees
+  standardHoursPerDay Decimal?         @db.Decimal(5, 2) // e.g., 8.00
+  totalWeeklyHours    Decimal          @db.Decimal(5, 2) // e.g., 40.00
+  effectiveFrom       DateTime
+  effectiveTo         DateTime?
+  isActive            Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dailySchedules WorkScheduleDay[]
+  assignedUsers  UserWorkSchedule[] // Many-to-many with users
+
+  @@unique([organizationId, name]) // Unique schedule names per organization
+  @@index([organizationId])
+  @@index([isDefault])
+  @@index([isActive])
+  @@schema("public")
+}
+
+// Daily breakdown of work schedule
+model WorkScheduleDay {
+  id           String   @id @default(uuid())
+  scheduleId   String
+  dayOfWeek    Int // 0-6 (Sunday-Saturday)
+  hoursPerDay  Decimal  @db.Decimal(5, 2) // e.g., 8.00
+  startTime    String? // e.g., "09:00"
+  endTime      String? // e.g., "17:00"
+  isWorkingDay Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  schedule WorkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, dayOfWeek])
+  @@index([scheduleId])
+  @@schema("public")
+}
+
+// Join table: Many users can have many work schedules
+model UserWorkSchedule {
+  id         String   @id @default(uuid())
+  userId     String
+  scheduleId String
+  assignedAt DateTime @default(now())
+  assignedBy String? // Who assigned this schedule
+  isActive   Boolean  @default(true) // Current schedule vs historical
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedule WorkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scheduleId]) // User can have same schedule only once
+  @@index([userId])
+  @@index([scheduleId])
+  @@index([isActive])
+  @@schema("public")
+}
+
+enum WorkScheduleType {
+  DURATION_BASED // Track by total hours
+  TIME_BASED // Track by clock in/out times
+  FLEXIBLE // No fixed schedule
+
+  @@schema("public")
+}
+
+enum AttendanceStatus {
+  PENDING // Waiting for clock out
+  COMPLETED // Clocked out
+  APPROVED // Verified by manager
+  REJECTED // Invalid entry
+  ABSENT // No clock in
+
   @@schema("public")
 }
 
@@ -337,16 +452,6 @@ enum ContractType {
   @@schema("public")
 }
 
-enum PositionType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  TEMPORARY
-  INTERN
-
-  @@schema("public")
-}
-
 enum EmploymentType {
   FULLTIME
   PARTTIME
@@ -354,5 +459,91 @@ enum EmploymentType {
   INTERN
   FREELANCE
 
+  @@schema("public")
+}
+
+enum AuditAction {
+  // User actions
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  USER_INVITED
+  USER_ROLE_CHANGED
+
+  // Organization actions
+  ORGANIZATION_CREATED
+  ORGANIZATION_APPROVED
+  ORGANIZATION_REJECTED
+  ORGANIZATION_SUSPENDED
+  ORGANIZATION_UPDATED
+
+  // Department/Branch actions
+  DEPARTMENT_CREATED
+  DEPARTMENT_UPDATED
+  DEPARTMENT_DELETED
+  BRANCH_CREATED
+  BRANCH_UPDATED
+  BRANCH_DELETED
+
+  // Employment actions
+  EMPLOYEE_HIRED
+  EMPLOYEE_PROMOTED
+  EMPLOYEE_TRANSFERRED
+  EMPLOYEE_TERMINATED
+  CONTRACT_CREATED
+  CONTRACT_UPDATED
+  CONTRACT_ENDED
+
+  // Attendance actions
+  ATTENDANCE_CLOCKED_IN
+  ATTENDANCE_CLOCKED_OUT
+  ATTENDANCE_APPROVED
+  ATTENDANCE_REJECTED
+  ATTENDANCE_UPDATED
+
+  // Work schedule actions
+  SCHEDULE_CREATED
+  SCHEDULE_UPDATED
+  SCHEDULE_DELETED
+
+  // Document actions
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  DOCUMENT_ACCESSED
+
+  // Time off actions (for future use)
+  TIME_OFF_REQUESTED
+  TIME_OFF_APPROVED
+  TIME_OFF_REJECTED
+  TIME_OFF_CANCELLED
+
+  // General
+  SETTINGS_UPDATED
+  OTHER
+
+  @@schema("public")
+}
+
+// Audit log for tracking all organizational activities
+model AuditLog {
+  id             String      @id @default(uuid())
+  organizationId String? // null for system-wide actions (e.g., org approval)
+  userId         String // Who performed the action
+  action         AuditAction
+  entityType     String // e.g., "User", "Department", "Attendance"
+  entityId       String? // ID of the affected entity
+  metadata       Json? // Additional context (old values, new values, etc.)
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
   @@schema("public")
 }
