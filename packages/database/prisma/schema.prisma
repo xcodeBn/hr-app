@@ -56,16 +56,16 @@ model User {
   sessions              Session[]
   magicLinks            MagicLink[]
   profile               UserProfile?
-  organization          Organization?  @relation("OrganizationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
-  department            Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  createdOrganization   Organization?  @relation("OrganizationCreator")
-  approvedOrganizations Organization[] @relation("OrganizationApprover")
+  organization          Organization?      @relation("OrganizationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
+  department            Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdOrganization   Organization?      @relation("OrganizationCreator")
+  approvedOrganizations Organization[]     @relation("OrganizationApprover")
   contracts             Contract[]
   documents             Documents[]
-  employments           Employment[]   @relation("employments")
-  managedEmployees      Employment[]   @relation("EmployeeLineManager")
+  employments           Employment[]       @relation("employments")
+  managedEmployees      Employment[]       @relation("EmployeeLineManager")
   attendances           Attendance[]
-  workSchedules         WorkSchedule[]
+  assignedSchedules     UserWorkSchedule[] // Many-to-many
   auditLogs             AuditLog[]
 
   @@index([organizationId])
@@ -358,25 +358,75 @@ model Attendance {
 }
 
 model WorkSchedule {
-  id             String    @id @default(uuid())
-  userId         String? // null = default org schedule
-  organizationId String
-  dayOfWeek      Int // 0-6 (Sunday-Saturday)
-  scheduledHours Decimal   @db.Decimal(5, 2) // e.g., 8.00
-  startTime      String? // e.g., "09:00"
-  endTime        String? // e.g., "17:00"
-  isActive       Boolean   @default(true)
-  effectiveFrom  DateTime
-  effectiveTo    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                  String           @id @default(uuid())
+  organizationId      String
+  name                String // e.g., "Mon-Fri, Duration 40 hours/week"
+  scheduleType        WorkScheduleType @default(DURATION_BASED)
+  isDefault           Boolean          @default(false) // Default schedule for new employees
+  standardHoursPerDay Decimal?         @db.Decimal(5, 2) // e.g., 8.00
+  totalWeeklyHours    Decimal          @db.Decimal(5, 2) // e.g., 40.00
+  effectiveFrom       DateTime
+  effectiveTo         DateTime?
+  isActive            Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
-  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dailySchedules WorkScheduleDay[]
+  assignedUsers  UserWorkSchedule[] // Many-to-many with users
 
-  @@unique([userId, dayOfWeek, effectiveFrom])
-  @@index([userId])
+  @@unique([organizationId, name]) // Unique schedule names per organization
   @@index([organizationId])
+  @@index([isDefault])
+  @@index([isActive])
+  @@schema("public")
+}
+
+// Daily breakdown of work schedule
+model WorkScheduleDay {
+  id           String   @id @default(uuid())
+  scheduleId   String
+  dayOfWeek    Int // 0-6 (Sunday-Saturday)
+  hoursPerDay  Decimal  @db.Decimal(5, 2) // e.g., 8.00
+  startTime    String? // e.g., "09:00"
+  endTime      String? // e.g., "17:00"
+  isWorkingDay Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  schedule WorkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, dayOfWeek])
+  @@index([scheduleId])
+  @@schema("public")
+}
+
+// Join table: Many users can have many work schedules
+model UserWorkSchedule {
+  id         String   @id @default(uuid())
+  userId     String
+  scheduleId String
+  assignedAt DateTime @default(now())
+  assignedBy String? // Who assigned this schedule
+  isActive   Boolean  @default(true) // Current schedule vs historical
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedule WorkSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scheduleId]) // User can have same schedule only once
+  @@index([userId])
+  @@index([scheduleId])
+  @@index([isActive])
+  @@schema("public")
+}
+
+enum WorkScheduleType {
+  DURATION_BASED // Track by total hours
+  TIME_BASED // Track by clock in/out times
+  FLEXIBLE // No fixed schedule
+
   @@schema("public")
 }
 
