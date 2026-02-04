@@ -207,8 +207,9 @@ model Department {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  users  User[]
+  branch     Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  users      User[]
+  Employment Employment[]
 
   @@index([branchId])
   @@schema("public")
@@ -240,8 +241,7 @@ model Employment {
   id             String         @id @default(uuid())
   userId         String
   employeeId     String // Employee ID (e.g., "UNI203")
-  jobTitle       String // e.g., "UI UX Designer"
-  positionType   PositionType? // Full-time, Part-time, etc.
+  jobTitleId     String // e.g., "UI UX Designer"
   employmentType EmploymentType // Full-time, Part-time, Contract, Intern
   lineManagerId  String? // Reference to manager's User ID
   departmentId   String? // Can track department changes over time
@@ -251,13 +251,25 @@ model Employment {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lineManager User? @relation("EmployeeLineManager", fields: [lineManagerId], references: [id], onDelete: SetNull)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lineManager User?       @relation("EmployeeLineManager", fields: [lineManagerId], references: [id], onDelete: SetNull)
+  jobTitle    JobTitles   @relation(fields: [jobTitleId], references: [id], onDelete: SetNull)
+  department  Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([employeeId])
   @@index([lineManagerId])
   @@index([isActive])
+  @@schema("public")
+}
+
+model JobTitles {
+  id         String       @id @default(uuid())
+  title      String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  Employment Employment[]
+
   @@schema("public")
 }
 
@@ -287,6 +299,15 @@ enum MaritalStatus {
 
   @@schema("public")
 }
+
+model Logs {
+}
+
+// model Attendance {
+//   id      String   @id @default(uuid())
+//   userId  String
+//   clockIn DateTime
+// }
 
 enum DocumentType {
   ID_CARD
@@ -332,16 +353,6 @@ enum ContractType {
   PARTTIME_FIXED_TERM
   CONTRACTOR
   FREELANCE
-  INTERN
-
-  @@schema("public")
-}
-
-enum PositionType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  TEMPORARY
   INTERN
 
   @@schema("public")
