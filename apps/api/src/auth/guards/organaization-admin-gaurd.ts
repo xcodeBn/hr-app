@@ -7,7 +7,7 @@ import {
 import type { AuthenticatedRequest } from './auth.guard';
 
 @Injectable()
-export class OrganizationAccessGuard implements CanActivate {
+export class OrganizationAdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
@@ -18,14 +18,20 @@ export class OrganizationAccessGuard implements CanActivate {
     }
 
     // SUPER_ADMIN can access any organization
-    // also i might change this, i think orgs should have some privacy from superadmins
     if (user.role === 'SUPER_ADMIN') {
       return true;
     }
 
-    // ORG_ADMIN and EMPLOYEE can only access their own organization
+    // Only ORG_ADMIN can access organization management endpoints
+    if (user.role !== 'ORG_ADMIN') {
+      throw new ForbiddenException(
+        'Only organization administrators can perform this action',
+      );
+    }
+
+    // ORG_ADMIN can only manage their own organization
     if (user.organizationId !== organizationId) {
-      throw new ForbiddenException('User not authenticated');
+      throw new ForbiddenException('You can only manage your own organization');
     }
 
     return true;
