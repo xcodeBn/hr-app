@@ -332,6 +332,7 @@ model Documents {
 model Attendance {
   id               String           @id @default(uuid())
   userId           String
+  organizationId   String // Denormalized for faster org-scoped queries
   date             DateTime         @db.Date
   clockIn          DateTime?
   clockInLocation  String?
@@ -353,7 +354,9 @@ model Attendance {
 
   @@unique([userId, date])
   @@index([userId])
+  @@index([organizationId])
   @@index([date])
+  @@index([organizationId, date]) // Composite index for org + date queries
   @@schema("public")
 }
 

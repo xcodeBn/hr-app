@@ -7,6 +7,12 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { DatabaseModule } from './database/database.module';
+import { BranchesModule } from './branches/branches.module';
+import { DepartmentsModule } from './departments/departments.module';
+import { JobTitlesModule } from './job-titles/job-titles.module';
+import { WorkSchedulesModule } from './work-schedules/work-schedules.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { EmploymentsModule } from './employments/employments.module';
 
 @Module({
   imports: [
@@ -20,6 +26,12 @@ import { DatabaseModule } from './database/database.module';
     AuthModule,
     MailModule,
     OrganizationsModule,
+    BranchesModule,
+    DepartmentsModule,
+    JobTitlesModule,
+    WorkSchedulesModule,
+    AttendanceModule,
+    EmploymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
