@@ -24,7 +24,7 @@ export class OrganizationAccessGuard implements CanActivate {
     }
 
     // ORG_ADMIN and EMPLOYEE can only access their own organization
-    if (user.organizationId !== organizationId) {
+    if (user.organizationId !== organizationId && user.role == 'ORG_ADMIN') {
       throw new ForbiddenException('User not authenticated');
     }
 
