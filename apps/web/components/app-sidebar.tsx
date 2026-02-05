@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   Building2,
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth, useUser } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -84,6 +85,15 @@ const orgNavItems: NavItem[] = [
   },
 ];
 
+// Navigation items for ORG_ADMIN with PENDING organization
+const pendingOrgNavItems: NavItem[] = [
+  {
+    title: 'Pending Approval',
+    url: '/pending-approval',
+    icon: AlertCircle,
+  },
+];
+
 // Navigation items for SUPER_ADMIN role
 const superAdminNavItems: NavItem[] = [
   {
@@ -126,7 +136,15 @@ export function AppSidebar() {
   const { user } = useUser({ redirectOnUnauthenticated: false });
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
-  const mainNavItems = isSuperAdmin ? superAdminNavItems : orgNavItems;
+  // @ts-ignore - organization field will be available once contracts are rebuilt
+  const isPendingOrg =
+    user?.role === 'ORG_ADMIN' && user?.organization?.status === 'PENDING';
+
+  const mainNavItems = isSuperAdmin
+    ? superAdminNavItems
+    : isPendingOrg
+      ? pendingOrgNavItems
+      : orgNavItems;
   const secondaryNavItems = isSuperAdmin
     ? superAdminSecondaryNavItems
     : orgSecondaryNavItems;

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { userRoleSchema } from './user-role.schema';
+import { organizationStatusSchema } from '../organizations/organization-status.schema';
 
 // User profile (optional nested object)
 const userProfileSchema = z.object({
@@ -12,6 +13,13 @@ const userProfileSchema = z.object({
   jobTitle: z.string().nullable(),
 });
 
+// Organization basic info (for user response)
+const userOrganizationSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  status: organizationStatusSchema,
+});
+
 // Response from /auth/me endpoint
 export const userResponseSchema = z.object({
   id: z.uuid(),
@@ -22,5 +30,6 @@ export const userResponseSchema = z.object({
   departmentId: z.uuid().nullable(),
   isConfirmed: z.boolean(),
   profile: userProfileSchema.nullable().optional(),
+  organization: userOrganizationSchema.nullable().optional(),
 });
 export type UserResponse = z.infer<typeof userResponseSchema>;

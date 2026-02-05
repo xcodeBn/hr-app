@@ -150,6 +150,20 @@ export class AuthService {
   }
 
   /**
+   * Get organization data for a user
+   */
+  async getUserOrganization(organizationId: string) {
+    return this.prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+      },
+    });
+  }
+
+  /**
    * Get the current user from session
    */
   async getCurrentUser(sessionId: string) {

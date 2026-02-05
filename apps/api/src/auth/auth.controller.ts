@@ -101,7 +101,22 @@ export class AuthController {
   }
 
   @Get('me')
-  getCurrentUser(@CurrentUser() user: User): UserResponse {
+  async getCurrentUser(@CurrentUser() user: User): Promise<UserResponse> {
+    // Fetch organization data if user has one
+    let organization: { id: string; name: string; status: any } | null = null;
+    if (user.organizationId) {
+      const org = await this.authService.getUserOrganization(
+        user.organizationId,
+      );
+      if (org) {
+        organization = {
+          id: org.id,
+          name: org.name,
+          status: org.status,
+        };
+      }
+    }
+
     return {
       id: user.id,
       email: user.email,
@@ -110,6 +125,7 @@ export class AuthController {
       organizationId: user.organizationId,
       departmentId: user.departmentId,
       isConfirmed: user.isConfirmed,
-    };
+      organization,
+    } as UserResponse;
   }
 }
