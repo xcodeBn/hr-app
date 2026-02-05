@@ -1,10 +1,20 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import * as crypto from 'crypto';
+import { hash } from '@node-rs/argon2';
 import { PrismaService } from '../database/prisma.service';
 import { SessionService } from './session.service';
 import { MAIL_QUEUE, MAIL_JOBS } from '../mail/mail.constants';
+import type {
+  SignupOrgAdminRequest,
+  SignupOrgAdminResponse,
+} from '@repo/contracts';
 
 const MAGIC_LINK_EXPIRY_MINUTES = 15;
 
@@ -156,6 +166,93 @@ export class AuthService {
       organizationId: user.organizationId,
       departmentId: user.departmentId,
       isConfirmed: user.isConfirmed,
+    };
+  }
+
+  /**
+   * Sign up a new organization admin with a pending organization
+   * The user and org will be inactive until approved by a super admin
+   */
+  async signupOrgAdmin(
+    dto: SignupOrgAdminRequest,
+  ): Promise<SignupOrgAdminResponse> {
+    // Check if email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email.toLowerCase() },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // Hash password
+    const hashedPassword = await hash(dto.password, {
+      memoryCost: 19456,
+      timeCost: 2,
+      outputLen: 32,
+      parallelism: 1,
+    });
+
+    // Create user and organization in a transaction
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Create the user as ORG_ADMIN
+      const user = await tx.user.create({
+        data: {
+          email: dto.email.toLowerCase(),
+          name: dto.name,
+          role: 'ORG_ADMIN',
+          isConfirmed: false, // Not confirmed until org is approved
+        },
+      });
+
+      // Create password in private schema
+      await tx.password.create({
+        data: {
+          userId: user.id,
+          hashedPassword,
+        },
+      });
+
+      // Create the organization with PENDING status
+      const organization = await tx.organization.create({
+        data: {
+          name: dto.organizationName,
+          description: dto.organizationDescription,
+          website: dto.organizationWebsite,
+          status: 'PENDING',
+          createdById: user.id,
+        },
+      });
+
+      // Link user to organization
+      await tx.user.update({
+        where: { id: user.id },
+        data: { organizationId: organization.id },
+      });
+
+      return { user, organization };
+    });
+
+    this.logger.log(
+      `New org admin signup: user ${result.user.id}, org ${result.organization.id}`,
+    );
+
+    return {
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        role: result.user.role,
+        isConfirmed: result.user.isConfirmed,
+      },
+      organization: {
+        id: result.organization.id,
+        name: result.organization.name,
+        status: result.organization.status,
+        createdAt: result.organization.createdAt,
+      },
+      message:
+        'Registration successful. Your organization is pending approval.',
     };
   }
 }

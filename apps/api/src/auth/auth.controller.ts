@@ -19,8 +19,11 @@ import {
 import {
   magicLinkRequestSchema,
   magicLinkVerifyRequestSchema,
+  signupOrgAdminRequestSchema,
   type MagicLinkRequest,
   type MagicLinkVerifyRequest,
+  type SignupOrgAdminRequest,
+  type SignupOrgAdminResponse,
   type UserResponse,
 } from '@repo/contracts';
 import type { User } from '@repo/db';
@@ -38,6 +41,16 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(magicLinkRequestSchema))
   async requestMagicLink(@Body() body: MagicLinkRequest) {
     return this.authService.requestMagicLink(body.email);
+  }
+
+  @Public()
+  @Post('signup/org-admin')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ZodValidationPipe(signupOrgAdminRequestSchema))
+  async signupOrgAdmin(
+    @Body() body: SignupOrgAdminRequest,
+  ): Promise<SignupOrgAdminResponse> {
+    return this.authService.signupOrgAdmin(body);
   }
 
   @Public()
