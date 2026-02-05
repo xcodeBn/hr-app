@@ -1,6 +1,7 @@
 import { prisma } from '../../src/client';
 import { seedSuperAdmins, seedOrgAdmins } from './seedUsers';
 import { seedOrganizations } from './seedOrganizations';
+import { seedComprehensiveOrg } from './seedComprehensiveOrg';
 
 async function main() {
   // Seed users first (org admins need to exist before organizations)
@@ -9,6 +10,9 @@ async function main() {
 
   // Seed organizations (links org admins to their orgs)
   await seedOrganizations(prisma);
+
+  // Seed comprehensive organization with complete data
+  await seedComprehensiveOrg(prisma);
 }
 main()
   .then(async () => {
