@@ -13,7 +13,10 @@ export const signupOrgAdminRequestSchema = z.object({
     .string()
     .min(2, { error: 'Organization name must be at least 2 characters' }),
   organizationDescription: z.string().optional(),
-  organizationWebsite: z.url({ error: 'Invalid website URL' }).optional(),
+  organizationWebsite: z
+    .union([z.url({ error: 'Invalid website URL' }), z.literal('')])
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
 });
 
 export type SignupOrgAdminRequest = z.infer<typeof signupOrgAdminRequestSchema>;
