@@ -14,7 +14,7 @@ import { WorkSchedulesService } from './work-schedules.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { OrganizationAdminGuard } from '../auth/guards/organaization-admin-gaurd';
 import { CurrentUser } from '../auth/decorators';
-import { ZodValidationPipe } from '../common/pipes';
+import { ZodValidationPipe } from '../common';
 import type { User } from '@repo/db';
 import {
   createWorkScheduleRequestSchema,

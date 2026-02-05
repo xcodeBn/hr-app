@@ -14,7 +14,7 @@ import { JobTitlesService } from './job-titles.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators';
-import { ZodValidationPipe } from '../common/pipes';
+import { ZodValidationPipe } from '../common';
 import {
   createJobTitleRequestSchema,
   updateJobTitleRequestSchema,

@@ -7,12 +7,15 @@ import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { SessionService } from './session.service';
 import { MailModule } from '../mail/mail.module';
+import { PrismaService } from '../database/prisma.service';
+import { DatabaseModule } from '../database/database.module';
 
 @Module({
-  imports: [MailModule],
+  imports: [MailModule, DatabaseModule],
   providers: [
     AuthService,
     SessionService,
+    PrismaService,
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
