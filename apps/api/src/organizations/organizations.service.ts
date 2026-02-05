@@ -211,4 +211,57 @@ export class OrganizationsService {
 
     return organization;
   }
+
+  /**
+   * Suspend an organization (set status to SUSPENDED)
+   */
+  async suspend(id: string): Promise<OrganizationDetailResponse> {
+    // Check if organization exists
+    const existing = await this.prisma.organization.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Organization with ID ${id} not found`);
+    }
+
+    const organization = await this.prisma.organization.update({
+      where: { id },
+      data: {
+        status: 'SUSPENDED',
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        description: true,
+        website: true,
+        createdAt: true,
+        updatedAt: true,
+        approvedAt: true,
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        approvedBy: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            users: true,
+            branches: true,
+          },
+        },
+      },
+    });
+
+    return organization;
+  }
 }

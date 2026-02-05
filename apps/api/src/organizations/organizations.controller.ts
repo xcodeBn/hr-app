@@ -54,4 +54,14 @@ export class OrganizationsController {
       organization,
     };
   }
+
+  @Patch(':id/suspend')
+  @Roles('SUPER_ADMIN')
+  async suspend(@Param('id') id: string): Promise<OrganizationActionResponse> {
+    const organization = await this.organizationsService.suspend(id);
+    return {
+      message: 'Organization suspended successfully',
+      organization,
+    };
+  }
 }
