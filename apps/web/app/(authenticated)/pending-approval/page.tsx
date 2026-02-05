@@ -36,7 +36,6 @@ export default function PendingApprovalPage() {
   // Redirect if user doesn't have a pending organization
   useEffect(() => {
     if (!isLoading && user) {
-      // @ts-ignore - organization field will be available once contracts are rebuilt
       const isPendingOrgAdmin =
         user.role === 'ORG_ADMIN' && user.organization?.status === 'PENDING';
 
@@ -69,7 +68,6 @@ export default function PendingApprovalPage() {
     return null;
   }
 
-  // @ts-ignore - organization field will be available once contracts are rebuilt
   const organizationName = user.organization?.name || 'Your Organization';
 
   return (
