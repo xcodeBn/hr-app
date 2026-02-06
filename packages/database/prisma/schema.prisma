@@ -258,7 +258,7 @@ model Employment {
 
   user        User        @relation("employments", fields: [userId], references: [id], onDelete: Cascade)
   lineManager User?       @relation("EmployeeLineManager", fields: [lineManagerId], references: [id], onDelete: SetNull)
-  jobTitle    JobTitles   @relation(fields: [jobTitleId], references: [id], onDelete: SetNull)
+  jobTitle    JobTitles   @relation(fields: [jobTitleId], references: [id], onDelete: Restrict)
   department  Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
 
   @@index([userId])

@@ -61,6 +61,7 @@ interface UseOrganizationReturn {
   error: Error | undefined;
   approve: () => Promise<OrganizationActionResponse>;
   reject: () => Promise<OrganizationActionResponse>;
+  suspend: () => Promise<OrganizationActionResponse>;
   mutate: () => void;
 }
 
@@ -109,12 +110,21 @@ export function useOrganization(
     return result;
   }, [id, invalidateAll]);
 
+  const suspend = useCallback(async () => {
+    const result = await apiPatch<OrganizationActionResponse>(
+      `/organizations/${id}/suspend`,
+    );
+    invalidateAll();
+    return result;
+  }, [id, invalidateAll]);
+
   return {
     organization: data,
     isLoading,
     error,
     approve,
     reject,
+    suspend,
     mutate: swrMutate,
   };
 }

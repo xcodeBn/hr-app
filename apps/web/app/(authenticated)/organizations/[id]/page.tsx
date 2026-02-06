@@ -28,6 +28,7 @@ import {
   XCircle,
   ShieldX,
   Clock,
+  Ban,
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -108,8 +109,10 @@ export default function OrganizationDetailPage() {
   const { user, isLoading: userLoading } = useUser();
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
 
   const orgId = params.id as string;
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
@@ -120,6 +123,7 @@ export default function OrganizationDetailPage() {
     error,
     approve,
     reject,
+    suspend,
   } = useOrganization(orgId, { enabled: isSuperAdmin });
 
   const handleApprove = async () => {
@@ -147,6 +151,20 @@ export default function OrganizationDetailPage() {
       console.error(err);
     } finally {
       setIsRejecting(false);
+    }
+  };
+
+  const handleSuspend = async () => {
+    setIsSuspending(true);
+    try {
+      await suspend();
+      toast.success('Organization suspended');
+      setShowSuspendDialog(false);
+    } catch (err) {
+      toast.error('Failed to suspend organization');
+      console.error(err);
+    } finally {
+      setIsSuspending(false);
     }
   };
 
@@ -182,6 +200,7 @@ export default function OrganizationDetailPage() {
   }
 
   const isPending = org.status === 'PENDING';
+  const isActive = org.status === 'ACTIVE';
 
   return (
     <div className="space-y-6">
@@ -205,26 +224,51 @@ export default function OrganizationDetailPage() {
           </div>
         </div>
 
-        {/* Action Buttons (only for PENDING organizations) */}
-        {isPending && (
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="gap-2 text-red-600 border-red-200 hover:bg-red-50"
-              onClick={() => setShowRejectDialog(true)}
-            >
-              <XCircle className="h-4 w-4" />
-              Reject
-            </Button>
-            <Button
-              className="gap-2 bg-green-600 hover:bg-green-700"
-              onClick={() => setShowApproveDialog(true)}
-            >
-              <CheckCircle className="h-4 w-4" />
-              Approve
-            </Button>
-          </div>
-        )}
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          {/* For PENDING organizations: show Reject and Approve */}
+          {isPending && (
+            <>
+              <Button
+                variant="outline"
+                className="gap-2 text-red-600 border-red-200 hover:bg-red-50"
+                onClick={() => setShowRejectDialog(true)}
+              >
+                <XCircle className="h-4 w-4" />
+                Reject
+              </Button>
+              <Button
+                className="gap-2 bg-green-600 hover:bg-green-700"
+                onClick={() => setShowApproveDialog(true)}
+              >
+                <CheckCircle className="h-4 w-4" />
+                Approve
+              </Button>
+            </>
+          )}
+
+          {/* For ACTIVE organizations: show Suspend and Reject */}
+          {isActive && (
+            <>
+              <Button
+                variant="outline"
+                className="gap-2 text-red-600 border-red-200 hover:bg-red-50"
+                onClick={() => setShowRejectDialog(true)}
+              >
+                <XCircle className="h-4 w-4" />
+                Reject
+              </Button>
+              <Button
+                variant="outline"
+                className="gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
+                onClick={() => setShowSuspendDialog(true)}
+              >
+                <Ban className="h-4 w-4" />
+                Suspend
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Details Grid */}
@@ -404,6 +448,36 @@ export default function OrganizationDetailPage() {
               disabled={isRejecting}
             >
               {isRejecting ? 'Rejecting...' : 'Reject'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suspend Confirmation Dialog */}
+      <Dialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suspend Organization</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to suspend <strong>{org.name}</strong>? This
+              will temporarily prevent the organization and its members from
+              accessing the platform. You can reactivate it later if needed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSuspendDialog(false)}
+              disabled={isSuspending}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={handleSuspend}
+              disabled={isSuspending}
+            >
+              {isSuspending ? 'Suspending...' : 'Suspend'}
             </Button>
           </DialogFooter>
         </DialogContent>
