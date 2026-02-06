@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="aea7f965-dc97-40ed-85b1-137ff3057eb5" name="Changes" comment="feat: add sortable headers to employee table for improved data organization">
+      <change beforePath="$PROJECT_DIR$/packages/database/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/packages/database/prisma/schema.prisma" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Hassan Bazzoun &lt;xcode.bazzoun@gmail.com&gt;" />
+      </list>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/employees-" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SIGN_OFF_COMMIT" value="true" />
+  </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/xcodeBn/hr-app.git",
+    "accountId": "a4ac61f2-11ec-433e-9843-673d301333a6"
+  }
+}]]></component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "dev/db-only",
+    "javascript.preferred.runtime.type.id": "node",
+    "last_opened_file_path": "/Users/apple/WebstormProjects/hr-app/apps/web/app/(authenticated)/employees/org-chart",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "npm.database > db:migrate.executor": "Run",
+    "npm.database > db:reset.executor": "Run",
+    "prettierjs.PrettierConfiguration.Package": "/Users/apple/WebstormProjects/hr-app/node_modules/prettier",
+    "ts.external.directory.path": "/Users/apple/WebstormProjects/hr-app/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="ReactDesignerToolWindowState">
+    <option name="myId2Visible">
+      <map>
+        <entry key="com.intellij.reactbuddy.reactComponents" value="false" />
+        <entry key="com.intellij.reactbuddy.reactInspector" value="false" />
+      </map>
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/apps/web/app/(authenticated)/employees/org-chart" />
+      <recent name="$PROJECT_DIR$/apps/web/app/(authenticated)/employees/manage-employees" />
+      <recent name="$PROJECT_DIR$/apps/web/app/(authenticated)/employees/directory" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/apps/web/app/(authenticated)" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.database &gt; db:reset">
+    <configuration name="Branches (e2e)" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/apps/api" />
+      <envs />
+      <scope-kind value="SUITE" />
+      <test-file value="$PROJECT_DIR$/apps/api/test/branches.e2e-spec.ts" />
+      <test-names>
+        <test-name value="Branches (e2e)" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="BranchesController" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/apps/api" />
+      <envs />
+      <scope-kind value="SUITE" />
+      <test-file value="$PROJECT_DIR$/apps/api/src/branches/branches.controller.spec.ts" />
+      <test-names>
+        <test-name value="BranchesController" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="BranchesService" type="JavaScriptTestRunnerJest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <jest-package value="$PROJECT_DIR$/node_modules/jest" />
+      <working-dir value="$PROJECT_DIR$/apps/api" />
+      <envs />
+      <scope-kind value="SUITE" />
+      <test-file value="$PROJECT_DIR$/apps/api/src/branches/branches.service.spec.ts" />
+      <test-names>
+        <test-name value="BranchesService" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <configuration name="database &gt; db:migrate" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/packages/database/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="db:migrate" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="database &gt; db:reset" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/packages/database/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="db:reset" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.database &gt; db:reset" />
+        <item itemvalue="npm.database &gt; db:migrate" />
+        <item itemvalue="Jest.BranchesService" />
+        <item itemvalue="Jest.BranchesController" />
+        <item itemvalue="Jest.Branches (e2e)" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="chore: add vcs.xml for Git version control configuration">
+      <option name="closed" value="true" />
+      <created>1770288390164</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770288390164</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat: add signup endpoint for organization admins with validation">
+      <option name="closed" value="true" />
+      <created>1770293928193</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1770293928193</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: add suspend functionality for organizations with confirmation dialog">
+      <option name="closed" value="true" />
+      <created>1770305237909</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1770305237909</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat: add pending approval page for organization admins and update user response with organization data">
+      <option name="closed" value="true" />
+      <created>1770314847831</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770314847831</updated>
+    </task>
+    <task id="LOCAL-00005" summary="feat: update organization website validation to allow empty string as a valid input">
+      <option name="closed" value="true" />
+      <created>1770319190076</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1770319190076</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: update job title relation to restrict deletion and remove TypeScript ignore comments">
+      <option name="closed" value="true" />
+      <created>1770327207884</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770327207884</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: add comprehensive organization seeding and employee management components">
+      <option name="closed" value="true" />
+      <created>1770333144600</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1770333144600</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat: add employee detail and list response schemas with validation">
+      <option name="closed" value="true" />
+      <created>1770334505590</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770334505590</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat: implement employee access control with AllowSelf decorator and organization guard">
+      <option name="closed" value="true" />
+      <created>1770336273695</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770336273695</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat: simplify employee access control by removing SelfOrAdminGuard and adjusting roles">
+      <option name="closed" value="true" />
+      <created>1770336813755</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770336813755</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feat: implement employee management page with detail view and loading states">
+      <option name="closed" value="true" />
+      <created>1770338054855</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1770338054855</updated>
+    </task>
+    <task id="LOCAL-00012" summary="feat: add sortable headers to employee table for improved data organization">
+      <option name="closed" value="true" />
+      <created>1770379753355</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1770379753356</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="chore: add vcs.xml for Git version control configuration" />
+    <MESSAGE value="feat: add signup endpoint for organization admins with validation" />
+    <MESSAGE value="feat: add suspend functionality for organizations with confirmation dialog" />
+    <MESSAGE value="feat: add pending approval page for organization admins and update user response with organization data" />
+    <MESSAGE value="feat: update organization website validation to allow empty string as a valid input" />
+    <MESSAGE value="feat: update job title relation to restrict deletion and remove TypeScript ignore comments" />
+    <MESSAGE value="feat: add comprehensive organization seeding and employee management components" />
+    <MESSAGE value="feat: add employee detail and list response schemas with validation" />
+    <MESSAGE value="feat: implement employee access control with AllowSelf decorator and organization guard" />
+    <MESSAGE value="feat: simplify employee access control by removing SelfOrAdminGuard and adjusting roles" />
+    <MESSAGE value="feat: implement employee management page with detail view and loading states" />
+    <MESSAGE value="feat: add sortable headers to employee table for improved data organization" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add sortable headers to employee table for improved data organization" />
+  </component>
+</project>
