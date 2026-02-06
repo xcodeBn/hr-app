@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-auth';
 import { useEmployees } from '@/hooks/use-employees';
@@ -33,8 +33,30 @@ import {
   ShieldX,
   Users,
   Eye,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import type { EmployeeStatus } from '@repo/contracts';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+type SortField =
+  | 'name'
+  | 'jobTitle'
+  | 'lineManager'
+  | 'department'
+  | 'branch'
+  | 'employeeStatus'
+  | 'accountStatus';
+type SortDirection = 'asc' | 'desc' | null;
+
+interface SortConfig {
+  field: SortField | null;
+  direction: SortDirection;
+}
 
 // ============================================================================
 // Constants
@@ -128,6 +150,36 @@ function EmptyState() {
   );
 }
 
+function SortableHeader({
+  label,
+  field,
+  sortConfig,
+  onSort,
+}: {
+  label: string;
+  field: SortField;
+  sortConfig: SortConfig;
+  onSort: (field: SortField) => void;
+}) {
+  const isActive = sortConfig.field === field;
+
+  return (
+    <button
+      className="flex items-center gap-1 hover:text-gray-900 transition-colors"
+      onClick={() => onSort(field)}
+    >
+      {label}
+      {isActive && sortConfig.direction === 'asc' ? (
+        <ArrowUp className="h-4 w-4" />
+      ) : isActive && sortConfig.direction === 'desc' ? (
+        <ArrowDown className="h-4 w-4" />
+      ) : (
+        <ArrowUpDown className="h-4 w-4 opacity-50" />
+      )}
+    </button>
+  );
+}
+
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -153,6 +205,12 @@ export default function ManageEmployeesPage() {
   );
   const [searchInput, setSearchInput] = useState('');
 
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    field: null,
+    direction: null,
+  });
+
   const isOrgAdmin = user?.role === 'ORG_ADMIN';
 
   const { employees, meta, isLoading, error } = useEmployees({
@@ -162,6 +220,67 @@ export default function ManageEmployeesPage() {
     status: statusFilter === 'all' ? undefined : statusFilter,
     enabled: isOrgAdmin,
   });
+
+  // Handle sorting
+  const handleSort = (field: SortField) => {
+    setSortConfig((prev) => {
+      if (prev.field !== field) {
+        return { field, direction: 'asc' };
+      }
+      if (prev.direction === 'asc') {
+        return { field, direction: 'desc' };
+      }
+      return { field: null, direction: null };
+    });
+  };
+
+  // Sort employees
+  const sortedEmployees = useMemo(() => {
+    if (!employees || !sortConfig.field || !sortConfig.direction) {
+      return employees;
+    }
+
+    return [...employees].sort((a, b) => {
+      let aValue: string | null = null;
+      let bValue: string | null = null;
+
+      switch (sortConfig.field) {
+        case 'name':
+          aValue = a.name;
+          bValue = b.name;
+          break;
+        case 'jobTitle':
+          aValue = a.jobTitle?.title ?? '';
+          bValue = b.jobTitle?.title ?? '';
+          break;
+        case 'lineManager':
+          aValue = a.lineManager?.name ?? '';
+          bValue = b.lineManager?.name ?? '';
+          break;
+        case 'department':
+          aValue = a.department?.name ?? '';
+          bValue = b.department?.name ?? '';
+          break;
+        case 'branch':
+          aValue = a.branch?.name ?? '';
+          bValue = b.branch?.name ?? '';
+          break;
+        case 'employeeStatus':
+          aValue = a.employeeStatus;
+          bValue = b.employeeStatus;
+          break;
+        case 'accountStatus':
+          aValue = a.accountStatus;
+          bValue = b.accountStatus;
+          break;
+      }
+
+      if (aValue === null || bValue === null) return 0;
+
+      const comparison = aValue.localeCompare(bValue);
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }, [employees, sortConfig]);
 
   // Handle search on enter
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -272,18 +391,67 @@ export default function ManageEmployeesPage() {
                   <TableHead className="w-12">
                     <Checkbox />
                   </TableHead>
-                  <TableHead>Employee Name</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Line Manager</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Office</TableHead>
-                  <TableHead>Employee Status</TableHead>
-                  <TableHead>Account</TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Employee Name"
+                      field="name"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Job Title"
+                      field="jobTitle"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Line Manager"
+                      field="lineManager"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Department"
+                      field="department"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Office"
+                      field="branch"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Employee Status"
+                      field="employeeStatus"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <SortableHeader
+                      label="Account"
+                      field="accountStatus"
+                      sortConfig={sortConfig}
+                      onSort={handleSort}
+                    />
+                  </TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
+                {sortedEmployees?.map((employee) => (
                   <TableRow
                     key={employee.id}
                     className="cursor-pointer"
