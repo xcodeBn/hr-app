@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
-import { Roles, CurrentUser } from '../auth/decorators';
+import { Roles, CurrentUser, RequirePermission } from '../auth/decorators';
 import type { User, OrganizationStatus } from '@repo/db';
 import type {
   OrganizationListResponse,
@@ -47,6 +47,7 @@ export class OrganizationsController {
 
   @Patch(':id/reject')
   @Roles('SUPER_ADMIN')
+  @RequirePermission('organizations:manage')
   async reject(@Param('id') id: string): Promise<OrganizationActionResponse> {
     const organization = await this.organizationsService.reject(id);
     return {

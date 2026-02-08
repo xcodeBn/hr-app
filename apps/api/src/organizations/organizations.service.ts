@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { RolesService } from '../roles/roles.service';
 import type { OrganizationStatus } from '@repo/db';
 import type {
   OrganizationListResponse,
@@ -8,7 +14,11 @@ import type {
 
 @Injectable()
 export class OrganizationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => RolesService))
+    private readonly rolesService: RolesService,
+  ) {}
 
   /**
    * Get all organizations with optional status filter
@@ -155,6 +165,9 @@ export class OrganizationsService {
         },
       },
     });
+
+    // Create default roles for the newly approved organization
+    await this.rolesService.createDefaultRolesForOrganization(id);
 
     return organization;
   }

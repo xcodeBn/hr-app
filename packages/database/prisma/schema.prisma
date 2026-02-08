@@ -78,6 +78,7 @@ model User {
   attendances           Attendance[]
   assignedSchedules     UserWorkSchedule[] // Many-to-many
   auditLogs             AuditLog[]
+  orgRoles              UserOrgRole[] // Organization-specific roles
 
   @@index([organizationId])
   @@index([departmentId])
@@ -188,6 +189,7 @@ model Organization {
   documents     Documents[]
   workSchedules WorkSchedule[]
   auditLogs     AuditLog[]
+  orgRoles      OrgRole[]
 
   @@index([approvedById])
   @@index([status])
@@ -475,6 +477,95 @@ enum EmploymentType {
 }
 
 //logs related, ignore for now
+// ==========================================
+// ORGANIZATION ROLES & PERMISSIONS
+// ==========================================
+
+// Access level for permissions
+enum PermissionAccess {
+  NO_ACCESS
+  VIEW_ONLY
+  VIEW_EDIT
+
+  @@schema("public")
+}
+
+// Predefined permission codes - seeded on app startup
+model Permission {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g., "employees:view", "attendance:manage"
+  section     String // UI section grouping: "Profile", "Attendance", "Documents", etc.
+  name        String // Human-readable name: "View Employees"
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+
+  @@index([section])
+  @@schema("public")
+}
+
+// Organization-specific roles (Admin, HR, Lead, Employee, custom roles)
+model OrgRole {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String // "Admin", "Human Resource", "Lead", "Employee"
+  description    String?  @db.Text
+  isDefault      Boolean  @default(false) // Is this the default role for new employees?
+  isSystemRole   Boolean  @default(false) // System roles can't be deleted (Admin, Employee)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  userOrgRoles    UserOrgRole[]
+
+  @@unique([organizationId, name]) // Role names must be unique within an org
+  @@index([organizationId])
+  @@index([isDefault])
+  @@schema("public")
+}
+
+// Join table: Links roles to permissions with access levels
+model RolePermission {
+  id           String           @id @default(uuid())
+  roleId       String
+  permissionId String
+  accessLevel  PermissionAccess @default(NO_ACCESS)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  role       OrgRole    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@schema("public")
+}
+
+// Join table: Assigns organization roles to users
+model UserOrgRole {
+  id         String   @id @default(uuid())
+  userId     String
+  roleId     String
+  assignedAt DateTime @default(now())
+  assignedBy String? // User ID who assigned this role
+
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role OrgRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId]) // User can only have a role once
+  @@index([userId])
+  @@index([roleId])
+  @@schema("public")
+}
+
+// ==========================================
+// AUDIT LOGS
+// ==========================================
+
 enum AuditAction {
   // User actions
   USER_CREATED

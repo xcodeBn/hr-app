@@ -4,7 +4,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aea7f965-dc97-40ed-85b1-137ff3057eb5" name="Changes" comment="feat: add sortable headers to employee table for improved data organization">
+    <list default="true" id="aea7f965-dc97-40ed-85b1-137ff3057eb5" name="Changes" comment="feat(database): add employee management, attendance, and audit logging models&#10;&#10;- Add EmployeeStatus enum for tracking employee lifecycle states&#10;  (ACTIVE, ON_BOARDING, PROBATION, ON_LEAVE, TERMINATED)&#10;&#10;- Extend User model with employeeStatus field and new relations&#10;  (contracts, documents, employments, attendances, schedules, auditLogs)&#10;&#10;- Extend UserProfile with additional fields:&#10;  - Insurance provider, personal tax ID, social insurance number&#10;  - Marital status (new MaritalStatus enum)&#10;  - Timezone support (IANA identifier)&#10;&#10;- Add Contract model for employment contract tracking&#10;  - Support multiple contract types (permanent, fixed-term, contractor, etc.)&#10;&#10;- Add Employment model for job position history&#10;  - Track job titles, employment types, line managers&#10;  - Support department transfers and position changes over time&#10;&#10;- Add JobTitles model for centralized job title management&#10;&#10;- Add Documents model for employee document storage&#10;  - Support various document types (ID, passport, contracts, certificates)&#10;&#10;- Add Attendance tracking system:&#10;  - Clock in/out with location and timezone&#10;  - Track scheduled, logged, paid, deficit, and overtime hours&#10;  - Attendance status workflow (PENDING → COMPLETED → APPROVED)&#10;&#10;- Add WorkSchedule system for flexible scheduling:&#10;  - Organization-level schedule templates&#10;  - Daily schedule breakdown (WorkScheduleDay)&#10;  - User-schedule assignments (UserWorkSchedule many-to-many)&#10;  - Support duration-based, time-based, and flexible schedules&#10;&#10;- Add AuditLog model for comprehensive activity tracking&#10;  - Track user, organization, employment, attendance, and document actions&#10;  - Store metadata, IP address, and user agent&#10;&#10;- Extend Organization model with documents, workSchedules, and auditLogs relations&#10;- Extend Department model with employments relation">
+      <change afterPath="$PROJECT_DIR$/apps/api/src/auth/decorators/require-permission.decorator.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/auth/guards/permissions.guard.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/auth/permissions-check.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/permissions/permissions.controller.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/permissions/permissions.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/permissions/permissions.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/roles/roles.controller.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/roles/roles.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/src/roles/roles.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/contracts/src/roles/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/contracts/src/roles/permission-access.schema.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/contracts/src/roles/role.request.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages/contracts/src/roles/role.response.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/app.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/app.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/auth/auth.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/auth/auth.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/auth/decorators/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/auth/decorators/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/organizations/organizations.controller.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/organizations/organizations.controller.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/organizations/organizations.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/organizations/organizations.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/src/organizations/organizations.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/src/organizations/organizations.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/contracts/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/contracts/src/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/database/prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/packages/database/prisma/schema.prisma" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +42,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature/employees-" />
+        <entry key="$PROJECT_DIR$" value="dev/db-only" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -34,13 +56,14 @@
 }]]></component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "git-widget-placeholder": "dev/db-only",
+    "git-widget-placeholder": "dev/permissions-experminations",
     "javascript.preferred.runtime.type.id": "node",
     "last_opened_file_path": "/Users/apple/WebstormProjects/hr-app/apps/web/app/(authenticated)/employees/org-chart",
     "node.js.selected.package.tslint": "(autodetect)",
     "npm.database > db:migrate.executor": "Run",
     "npm.database > db:reset.executor": "Run",
     "prettierjs.PrettierConfiguration.Package": "/Users/apple/WebstormProjects/hr-app/node_modules/prettier",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "ts.external.directory.path": "/Users/apple/WebstormProjects/hr-app/node_modules/typescript/lib"
   }
 }]]></component>
@@ -128,6 +151,13 @@
         <item itemvalue="Jest.Branches (e2e)" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-c7e53b3be11b-JavaScript-WS-253.28294.332" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="TaskManager">
     <task id="LOCAL-00001" summary="chore: add vcs.xml for Git version control configuration">
@@ -226,7 +256,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770379753356</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat(database): add employee management, attendance, and audit logging models&#10;&#10;- Add EmployeeStatus enum for tracking employee lifecycle states&#10;  (ACTIVE, ON_BOARDING, PROBATION, ON_LEAVE, TERMINATED)&#10;&#10;- Extend User model with employeeStatus field and new relations&#10;  (contracts, documents, employments, attendances, schedules, auditLogs)&#10;&#10;- Extend UserProfile with additional fields:&#10;  - Insurance provider, personal tax ID, social insurance number&#10;  - Marital status (new MaritalStatus enum)&#10;  - Timezone support (IANA identifier)&#10;&#10;- Add Contract model for employment contract tracking&#10;  - Support multiple contract types (permanent, fixed-term, contractor, etc.)&#10;&#10;- Add Employment model for job position history&#10;  - Track job titles, employment types, line managers&#10;  - Support department transfers and position changes over time&#10;&#10;- Add JobTitles model for centralized job title management&#10;&#10;- Add Documents model for employee document storage&#10;  - Support various document types (ID, passport, contracts, certificates)&#10;&#10;- Add Attendance tracking system:&#10;  - Clock in/out with location and timezone&#10;  - Track scheduled, logged, paid, deficit, and overtime hours&#10;  - Attendance status workflow (PENDING → COMPLETED → APPROVED)&#10;&#10;- Add WorkSchedule system for flexible scheduling:&#10;  - Organization-level schedule templates&#10;  - Daily schedule breakdown (WorkScheduleDay)&#10;  - User-schedule assignments (UserWorkSchedule many-to-many)&#10;  - Support duration-based, time-based, and flexible schedules&#10;&#10;- Add AuditLog model for comprehensive activity tracking&#10;  - Track user, organization, employment, attendance, and document actions&#10;  - Store metadata, IP address, and user agent&#10;&#10;- Extend Organization model with documents, workSchedules, and auditLogs relations&#10;- Extend Department model with employments relation">
+      <option name="closed" value="true" />
+      <created>1770380375712</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1770380375712</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -242,6 +280,7 @@
     <MESSAGE value="feat: simplify employee access control by removing SelfOrAdminGuard and adjusting roles" />
     <MESSAGE value="feat: implement employee management page with detail view and loading states" />
     <MESSAGE value="feat: add sortable headers to employee table for improved data organization" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: add sortable headers to employee table for improved data organization" />
+    <MESSAGE value="feat(database): add employee management, attendance, and audit logging models&#10;&#10;- Add EmployeeStatus enum for tracking employee lifecycle states&#10;  (ACTIVE, ON_BOARDING, PROBATION, ON_LEAVE, TERMINATED)&#10;&#10;- Extend User model with employeeStatus field and new relations&#10;  (contracts, documents, employments, attendances, schedules, auditLogs)&#10;&#10;- Extend UserProfile with additional fields:&#10;  - Insurance provider, personal tax ID, social insurance number&#10;  - Marital status (new MaritalStatus enum)&#10;  - Timezone support (IANA identifier)&#10;&#10;- Add Contract model for employment contract tracking&#10;  - Support multiple contract types (permanent, fixed-term, contractor, etc.)&#10;&#10;- Add Employment model for job position history&#10;  - Track job titles, employment types, line managers&#10;  - Support department transfers and position changes over time&#10;&#10;- Add JobTitles model for centralized job title management&#10;&#10;- Add Documents model for employee document storage&#10;  - Support various document types (ID, passport, contracts, certificates)&#10;&#10;- Add Attendance tracking system:&#10;  - Clock in/out with location and timezone&#10;  - Track scheduled, logged, paid, deficit, and overtime hours&#10;  - Attendance status workflow (PENDING → COMPLETED → APPROVED)&#10;&#10;- Add WorkSchedule system for flexible scheduling:&#10;  - Organization-level schedule templates&#10;  - Daily schedule breakdown (WorkScheduleDay)&#10;  - User-schedule assignments (UserWorkSchedule many-to-many)&#10;  - Support duration-based, time-based, and flexible schedules&#10;&#10;- Add AuditLog model for comprehensive activity tracking&#10;  - Track user, organization, employment, attendance, and document actions&#10;  - Store metadata, IP address, and user agent&#10;&#10;- Extend Organization model with documents, workSchedules, and auditLogs relations&#10;- Extend Department model with employments relation" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(database): add employee management, attendance, and audit logging models&#10;&#10;- Add EmployeeStatus enum for tracking employee lifecycle states&#10;  (ACTIVE, ON_BOARDING, PROBATION, ON_LEAVE, TERMINATED)&#10;&#10;- Extend User model with employeeStatus field and new relations&#10;  (contracts, documents, employments, attendances, schedules, auditLogs)&#10;&#10;- Extend UserProfile with additional fields:&#10;  - Insurance provider, personal tax ID, social insurance number&#10;  - Marital status (new MaritalStatus enum)&#10;  - Timezone support (IANA identifier)&#10;&#10;- Add Contract model for employment contract tracking&#10;  - Support multiple contract types (permanent, fixed-term, contractor, etc.)&#10;&#10;- Add Employment model for job position history&#10;  - Track job titles, employment types, line managers&#10;  - Support department transfers and position changes over time&#10;&#10;- Add JobTitles model for centralized job title management&#10;&#10;- Add Documents model for employee document storage&#10;  - Support various document types (ID, passport, contracts, certificates)&#10;&#10;- Add Attendance tracking system:&#10;  - Clock in/out with location and timezone&#10;  - Track scheduled, logged, paid, deficit, and overtime hours&#10;  - Attendance status workflow (PENDING → COMPLETED → APPROVED)&#10;&#10;- Add WorkSchedule system for flexible scheduling:&#10;  - Organization-level schedule templates&#10;  - Daily schedule breakdown (WorkScheduleDay)&#10;  - User-schedule assignments (UserWorkSchedule many-to-many)&#10;  - Support duration-based, time-based, and flexible schedules&#10;&#10;- Add AuditLog model for comprehensive activity tracking&#10;  - Track user, organization, employment, attendance, and document actions&#10;  - Store metadata, IP address, and user agent&#10;&#10;- Extend Organization model with documents, workSchedules, and auditLogs relations&#10;- Extend Department model with employments relation" />
   </component>
 </project>

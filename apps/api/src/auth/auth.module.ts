@@ -5,6 +5,11 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import {
+  PermissionsGuard,
+  PermissionCacheService,
+} from './guards/permissions.guard';
+import { PermissionsCheckService } from './permissions-check.service';
 import { SessionService } from './session.service';
 import { MailModule } from '../mail/mail.module';
 
@@ -13,6 +18,8 @@ import { MailModule } from '../mail/mail.module';
   providers: [
     AuthService,
     SessionService,
+    PermissionCacheService,
+    PermissionsCheckService,
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
@@ -27,8 +34,18 @@ import { MailModule } from '../mail/mail.module';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
   ],
   controllers: [AuthController],
-  exports: [AuthService, SessionService],
+  exports: [
+    AuthService,
+    SessionService,
+    PermissionCacheService,
+    PermissionsCheckService,
+    'REDIS_CLIENT',
+  ],
 })
 export class AuthModule {}
